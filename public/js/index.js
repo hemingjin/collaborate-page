@@ -28,11 +28,40 @@ $(function(){
             console.log('邮箱地址格式不正确');
             return;
         }else{
-            $('#addUser').submit();
+            //$('#addUser').submit();
+            $.ajax({
+                type: 'post',
+                url: "/user/add",
+                dataType: "json",
+                data: $('#addUser').serialize(),
+                success: function (result) {
+                    console.log(result);//打印服务端返回的数据(调试用)
+                    if (result.code == 200) {
+                        alert("SUCCESS");
+                        window.location.reload();
+                    }
+                },
+                error: function() {
+                    alert("异常！");
+                }
+            })
         }
     });
 
-
+    $('#list').on('click', function(){
+        $.ajax({
+            type: 'get',
+            url: '/user',
+            error: function(err){
+                console.log(err)
+            },
+            success: function(res){
+                console.log(res);
+                $('#test').empty();
+                tdItem(res);
+            }
+        })
+    })
 });
 
 //validators
@@ -52,4 +81,12 @@ var validators = {
         var reg = /\d{3}-\d{8}|\d{4}-\d{7}/;
         return reg.test(str);
     }
+}
+
+function tdItem(data){
+    var item = '<tr><td>id</id><td>用户名</id><td>联系电话</id><td>邮箱</id></tr>'
+    for(var i = 0; i < data.length; i++){
+        item += '<tr><td>'+data[i].id+'</td><td>'+data[i].user_name+'</td><td>'+data[i].tel+'</td><td>'+data[i].email+'</td></tr>'
+    }
+    $('#test').append(item);
 }

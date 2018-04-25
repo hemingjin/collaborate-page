@@ -14,20 +14,36 @@ var responseJSON = function (res, ret) {
          res.json(ret); 
      }
 };
-/* GET users listing. */
-//添加用户
+
+//查看所有用户
 router.get('/', function(req, res, next) {
+    pool.getConnection(function(err, connection){
+        connection.query(sqlOperate.queryAll, function(error, result){
+            if(error){
+                console.log(error);
+            }else{
+                responseJSON(res, result);   
+                // 释放连接  
+                connection.release();  
+            }
+        });
+    });
+});
+//添加用户
+router.post('/add', function(req, res, next) {
     //从连接池获取连接
     pool.getConnection( function(err, connection){
         //获取前台传来的参数
-        var param = req.query || req.params;
+
+        var param = req.body || req.query || req.params;
         //建立链接增加一个用户信息
-        connection.query(sqlOperate.insert, [param.username, param.tel, param.company], function(error, result){
+        connection.query(sqlOperate.insert, [param.username, param.tel, param.email], function(error, result){
             if(result) {      
                result = {   
                   code: 200,   
                   msg:'增加成功'
                };  
+               
             }     
             // 以json形式，把操作结果返回给前台页面     
             responseJSON(res, result);   
